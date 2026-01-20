@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Case of the Misleading Metrics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=Crimson+Pro:italic,wght@600&display=swap');
+
+        :root {
+            --slate-900: #0f172a;
+            --teal-600: #0d9488;
+            --teal-50: #f0fdfa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: var(--slate-900);
+            overflow-x: hidden;
+        }
+
+        .heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .serif { font-family: 'Crimson Pro', serif; }
+
+        .game-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .btn-teal {
+            background-color: var(--teal-600);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.2);
+        }
+        .btn-teal:hover { background-color: #0f766e; transform: translateY(-1px); }
+
+        .npc-chat {
+            background: var(--teal-50);
+            border-left: 4px solid var(--teal-600);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .npc-chat:hover { transform: scale(1.02); background: #e6fcf5; }
+
+        .drop-zone {
+            min-height: 120px;
+            border: 2px dashed #cbd5e1;
+            background: #f1f5f9;
+            border-radius: 1rem;
+            padding: 1rem;
+            transition: all 0.2s;
+        }
+        .drop-zone.active { border-color: var(--teal-600); background: var(--teal-50); }
+
+        .evidence-token {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 0.6rem;
+            border: 1px solid #e2e8f0;
+            cursor: grab;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .stage-hidden { display: none; }
+        
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        textarea::placeholder { color: #94a3b8; font-style: italic; }
+    </style>
+</head>
+<body class="antialiased p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- TOP NAV -->
+        <header class="flex justify-between items-center mb-10 pb-4 border-b border-slate-200">
+            <div>
+                <h1 class="text-2xl font-extrabold heading text-slate-900">Sherlock CME: The Misleading Metrics</h1>
+                <p id="status-text" class="text-[10px] font-black uppercase text-teal-600 tracking-[0.2em] mt-1">Status: Verification Required</p>
+            </div>
+            <div id="session-timer" class="text-right hidden">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Time Remaining</span>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-teal-600 text-sm"></i>
+                    <span id="timer" class="font-mono font-bold text-xl text-slate-700">15:00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- STAGE 0: LOGIN -->
+        <section id="login-stage" class="game-card p-10 md:p-16 animate-up text-center max-w-lg mx-auto">
+            <div class="w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <i class="fa-solid fa-user-secret text-5xl text-teal-600"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-4 heading">Identify Yourself</h2>
+            <p class="text-slate-500 mb-10 leading-relaxed">Access to internal CME Case Files requires detective authorization. Please enter your name to proceed.</p>
+            <input type="text" id="name-input" placeholder="Enter Detective Name" class="w-full p-4 border-2 border-slate-100 rounded-2xl mb-6 focus:border-teal-500 outline-none text-center text-xl font-medium shadow-sm transition-all">
+            <button onclick="beginInvestigation()" class="w-full btn-teal py-5 rounded-2xl font-bold uppercase tracking-widest text-sm transition-all shadow-xl">Report for Duty</button>
+        </section>
+
+        <!-- STAGE 1: CASE FILE 1 -->
+        <section id="case1-stage" class="stage-hidden animate-up space-y-8">
+            <div class="grid lg:grid-cols-12 gap-8">
+                <!-- Case Summary -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="game-card p-8 border-l-[10px] border-l-teal-600 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-5 pointer-events-none">
+                            <i class="fa-solid fa-file-invoice text-9xl"></i>
+                        </div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="bg-teal-100 text-teal-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Case A</span>
+                            <h3 class="font-bold heading text-2xl">"The Program Everyone Loved"</h3>
+                        </div>
+                        <p class="text-slate-600 mb-8 leading-relaxed">
+                            <span class="font-bold text-slate-900 block mb-1">Narrative Summary:</span>
+                            A CME activity focused on clinical decision-making is being called a "model success." Your job is to find if the evidence actually supports the success story.
+                        </p>
+                        
+                        <!-- Dashboard -->
+                        <div class="grid grid-cols-3 gap-4 mb-10">
+                            <div class="bg-slate-50 p-4 rounded-2xl border text-center">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Satisfaction</span>
+                                <span class="text-2xl font-extrabold text-teal-600">94%</span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border text-center">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Knowledge Gain</span>
+                                <span class="text-2xl font-extrabold text-teal-600">+38%</span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border text-center">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Confidence</span>
+                                <span class="text-2xl font-extrabold text-teal-600">High</span>
+                            </div>
+                        </div>
+
+                        <!-- NPC Interrogations -->
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold uppercase text-slate-400 tracking-widest">Witness Statements</h4>
+                            <div class="npc-chat" onclick="interrogate('Manager', 'The 94% satisfaction score is proof of success! Stakeholders are thrilled.')">
+                                <span class="text-[10px] font-black text-teal-600 uppercase">Program Manager:</span>
+                                <p class="text-sm italic text-slate-700 mt-1">"World-class ratings prove impact..."</p>
+                            </div>
+                            <div class="npc-chat" onclick="interrogate('Clinician', 'I enjoyed the talk, but I haven\'t changed anything in my clinical practice.')">
+                                <span class="text-[10px] font-black text-teal-600 uppercase">Clinician:</span>
+                                <p class="text-sm italic text-slate-700 mt-1">"Interesting, but no change in decisions..."</p>
+                            </div>
+                            <div class="npc-chat" onclick="interrogate('Analyst', 'Knowledge scores improved, but we did not track behavioral follow-up.')">
+                                <span class="text-[10px] font-black text-teal-600 uppercase">Analyst:</span>
+                                <p class="text-sm italic text-slate-700 mt-1">"We have zero data on real-world application..."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deduction Board -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="game-card p-8 bg-slate-900 text-white shadow-2xl">
+                        <h3 class="font-bold heading text-xl mb-8 text-teal-400">Deduction Board</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-400 block mb-2">Insight (Data suggest...)</label>
+                                <textarea id="c1-insight" class="w-full bg-slate-800 border-slate-700 rounded-xl p-4 text-xs h-20 outline-none focus:border-teal-500 text-slate-200" placeholder="e.g. High learner satisfaction..."></textarea>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-400 block mb-2">Action (Learners did...)</label>
+                                <textarea id="c1-action" class="w-full bg-slate-800 border-slate-700 rounded-xl p-4 text-xs h-20 outline-none focus:border-teal-500 text-slate-200" placeholder="e.g. Gained knowledge but didn't change practice..."></textarea>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase text-slate-400 block mb-2">Outcome (Responsible Claim)</label>
+                                <textarea id="c1-outcome" class="w-full bg-slate-800 border-slate-700 rounded-xl p-4 text-xs h-20 outline-none focus:border-teal-500 text-slate-200" placeholder="e.g. Program was well-received but unproven impact..."></textarea>
+                            </div>
+                        </div>
+                        <button onclick="completeCase1()" class="w-full mt-10 bg-teal-500 text-slate-900 font-extrabold py-5 rounded-2xl text-xs uppercase hover:bg-white transition-all">Submit Findings</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 2: CASE FILE 2 -->
+        <section id="case2-stage" class="stage-hidden animate-up space-y-8">
+            <div class="grid lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="game-card p-8 border-l-[10px] border-l-indigo-600 relative">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Case B</span>
+                            <h3 class="font-bold heading text-2xl">"The Too-Good Outcome"</h3>
+                        </div>
+                        <p class="text-slate-600 mb-8 leading-relaxed">
+                            Hospitalizations dropped from 14% to 9%. A new clinical protocol launched the same week. Can we credit the education?
+                        </p>
+                        
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="space-y-2">
+                                <h5 class="text-[8px] font-black uppercase text-center text-teal-600">Likely Contributed</h5>
+                                <div id="bin-likely" ondrop="drop(event)" ondragover="allowDrop(event)" class="drop-zone"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <h5 class="text-[8px] font-black uppercase text-center text-indigo-600">Possible Link</h5>
+                                <div id="bin-maybe" ondrop="drop(event)" ondragover="allowDrop(event)" class="drop-zone"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <h5 class="text-[8px] font-black uppercase text-center text-rose-600">No Credit</h5>
+                                <div id="bin-no" ondrop="drop(event)" ondragover="allowDrop(event)" class="drop-zone"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="pool" class="flex flex-wrap gap-2 p-4 bg-slate-100 rounded-2xl">
+                            <div id="e1" draggable="true" ondragstart="drag(event)" class="evidence-token">5% Hospitalization Decrease</div>
+                            <div id="e2" draggable="true" ondragstart="drag(event)" class="evidence-token">New protocol launched same week</div>
+                            <div id="e3" draggable="true" ondragstart="drag(event)" class="evidence-token">Follow-up data from 63/420 learners</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="game-card p-8 bg-slate-900 text-white">
+                        <h3 class="font-bold heading text-xl mb-6 text-teal-400">Final Task</h3>
+                        <p class="text-[11px] text-slate-400 mb-8">Draft a defensible outcome statement for Case B.</p>
+                        <textarea id="final-outcome" class="w-full bg-slate-800 border-slate-700 rounded-xl p-4 text-xs h-32 outline-none focus:border-teal-500" placeholder="e.g. Supported the adoption of new standards, though other factors contributed..."></textarea>
+                        <button onclick="finishInvestigation()" class="w-full mt-10 bg-teal-500 text-slate-900 font-extrabold py-5 rounded-2xl text-xs uppercase hover:bg-white transition-all shadow-lg">Finalize Case</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 3: CONCLUSION -->
+        <section id="conclusion-stage" class="stage-hidden text-center animate-up max-w-2xl mx-auto py-10">
+            <div class="game-card p-12 shadow-2xl">
+                <div class="w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
+                    <i class="fa-solid fa-check-double text-4xl text-teal-600"></i>
+                </div>
+                <h2 class="text-4xl font-extrabold heading mb-6">Case Closed</h2>
+                <div id="summary-area" class="text-left space-y-8 border-y border-slate-100 py-10 my-10"></div>
+                <button onclick="location.reload()" class="text-teal-600 font-black uppercase text-[10px] hover:underline">New Simulation</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- NPC MODAL -->
+    <div id="npc-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 hidden" onclick="closeModal()">
+        <div class="bg-white p-10 rounded-[2.5rem] max-w-sm w-full animate-up shadow-2xl" onclick="event.stopPropagation()">
+            <h4 id="npc-name" class="font-black text-slate-900 uppercase text-[10px]">Witness Statement</h4>
+            <p id="npc-text" class="text-slate-700 italic text-lg leading-relaxed serif mt-4"></p>
+            <button onclick="closeModal()" class="w-full mt-10 bg-slate-900 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-lg">Resume</button>
+        </div>
+    </div>
+
+    <script>
+        let detective = "";
+        let seconds = 900;
+        let timerId;
+
+        function beginInvestigation() {
+            detective = document.getElementById('name-input').value.trim();
+            if(!detective) { alert("Enter your name, Detective."); return; }
+            document.getElementById('login-stage').classList.add('stage-hidden');
+            document.getElementById('case1-stage').classList.remove('stage-hidden');
+            document.getElementById('status-text').innerText = "Analyzing: Case File A";
+            document.getElementById('session-timer').classList.remove('hidden');
+            timerId = setInterval(() => {
+                if(seconds > 0) {
+                    seconds--;
+                    const m = Math.floor(seconds/60);
+                    const s = seconds % 60;
+                    document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                }
+            }, 1000);
+        }
+
+        function interrogate(name, text) {
+            document.getElementById('npc-name').innerText = name;
+            document.getElementById('npc-text').innerText = `"${text}"`;
+            document.getElementById('npc-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('npc-modal').classList.add('hidden'); }
+
+        function completeCase1() {
+            const inputs = ['c1-insight', 'c1-action', 'c1-outcome'];
+            if(inputs.some(id => !document.getElementById(id).value.trim())) {
+                alert("Complete the Deduction Board sections.");
+                return;
+            }
+            document.getElementById('case1-stage').classList.add('stage-hidden');
+            document.getElementById('case2-stage').classList.remove('stage-hidden');
+            document.getElementById('status-text').innerText = "Analyzing: Case File B";
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('active'); }
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+        function drop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('active');
+            var data = ev.dataTransfer.getData("text");
+            var card = document.getElementById(data);
+            ev.currentTarget.appendChild(card);
+            card.style.width = "100%";
+        }
+
+        function finishInvestigation() {
+            const finalOut = document.getElementById('final-outcome').value.trim();
+            if(!finalOut) { alert("Draft an outcome statement."); return; }
+            clearInterval(timerId);
+            document.getElementById('case2-stage').classList.add('stage-hidden');
+            document.getElementById('conclusion-stage').classList.remove('stage-hidden');
+            document.getElementById('status-text').innerText = "Status: Case Complete";
+            document.getElementById('summary-area').innerHTML = `
+                <p>Detective <span class="text-teal-600 font-bold">${detective}</span>, you successfully navigated the complexities of CME metrics.</p>
+                <div class="bg-teal-50 p-6 rounded-3xl border border-teal-100">
+                    <p class="text-slate-700 italic text-sm">"${finalOut}"</p>
+                </div>
+            `;
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+    </script>
+</body>
+</html>
